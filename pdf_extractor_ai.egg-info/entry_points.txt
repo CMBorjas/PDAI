@@ -1,0 +1,2 @@
+[console_scripts]
+pdf-extractor = src.pdf_extractor:main
