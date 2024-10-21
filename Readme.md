@@ -72,3 +72,18 @@ Each member will contribute to the testing and documentation for their assigned 
   - `feature/explainability`
 - Merge code into a development branch after reviewing pull requests.
 - Use the main branch for the final, tested version of the project.
+
+
+## 5. How to Lauch (Tenative)
+
+  - Dowload Anaconda
+  - Create an environment for this application
+  - Activate you environment
+  - Change your directory to the appropriate folder
+  - Enter the following command in your Anaconda environment 
+    - \"python -m ex_ai.Ui"
+  - Click on \"Select a Pdf file"
+  - Wait for extraction.
+  - Click on export txt file
+  - File should be in the same directory as the original pdf file
+  - Give yourself a yodahigh five.
