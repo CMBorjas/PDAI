@@ -32,11 +32,11 @@ def select_file_and_extract():
 
 # Function to export the extracted text to a .txt file
 def export_to_txt():
-    global extracted_text, pdf_file_path
+    global extracted_text, pdf_file_path # No choice but to use global variables
     if extracted_text and pdf_file_path:
         # Get the name of the original PDF without extension
         file_name = os.path.splitext(os.path.basename(pdf_file_path))[0]
-        # Create a .txt file with the same name as the PDF
+        # Create file with the same name as the PDF
         txt_file_path = os.path.join(os.path.dirname(pdf_file_path), f"{file_name}.txt")
         try:
             with open(txt_file_path, 'w', encoding='utf-8') as txt_file:

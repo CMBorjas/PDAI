@@ -1,7 +1,7 @@
 # PDAI
 
 ## Requirements
-- **Anaconda(Lastest version)**: Create and environment and run the setup.py in the root directory of the repository.
+- **Anaconda(Lastest version)**: Create an environment and run the setup.py in the root directory of the repository.
 
 ## 1. Detailed Breakdown
 
