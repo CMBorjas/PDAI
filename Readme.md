@@ -61,6 +61,8 @@ Each person can take responsibility for one or more modules:
 - **Person 4**: Explainability (explainable_ai)
   - TODO: Implement explainability techniques (SHAP, LIME) and visualize decision-making in text extraction and generation.
 
+- **Generated Paragraph**: Implement text generation for the data added by users. Model should be able to be added to the SHAP and LIME Pipepline.
+
 Each member will contribute to the testing and documentation for their assigned module.
 
 ## 4. Branching and Workflow (GitHub)
