@@ -53,9 +53,9 @@ This folder holds unit tests for each module.
 Each person can take responsibility for one or more modules:
 
 - **Person 1**: PDF Text Extraction (pdf_extraction)
-  - TODO: Extract text from PDFs, integrate OCR if needed for scanned PDFs.
+  - Complete: Extract text from PDFs, integrate OCR if needed for scanned PDFs.
 - **Person 2**: Text Analysis (text_analysis)
-  - TODO: Use NLP techniques to process extracted text, implement tokenization, entity extraction, etc.
+  - Complete: Use NLP techniques to process extracted text, implement tokenization, entity extraction, etc.
 - **Person 3**: Word Document Generation (word_generation)
   - TODO: Create Word documents from processed text and support customization options.
 - **Person 4**: Explainability (explainable_ai)
