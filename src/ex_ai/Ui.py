@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from pdf_extraction.extractor import extract_text_from_pdf
-from text_analysis.txt_analysis import summarize_text, extract_keywords, categorize_text, extract_text_with_ocr
+from text_analysis.txt_analysis import *
 import os
 from docx import Document
 
@@ -97,6 +97,24 @@ def perform_ocr_extraction():
     else:
         messagebox.showwarning("No File Selected", "Please select a PDF file for OCR.")
 
+# function to display tokenized text
+def display_tokenized_text():
+    global extracted_text
+    if extracted_text:
+        tokens = tokenize_text(extracted_text)
+        text_output.insert(tk.END, f"\n--- Tokenized Text ---\n{', '.join(tokens)}\n")
+    else:
+        messagebox.showwarning("No Text to Tokenize", "Please extract text from a PDF first.")
+
+# function to display extracted entities
+def display_extracted_entities():
+    global extracted_text
+    if extracted_text:
+        entities = extract_entities(extracted_text)
+        text_output.insert(tk.END, f"\n--- Extracted Entities ---\n{', '.join(entities)}\n")
+    else:
+        messagebox.showwarning("No Text to Extract Entities", "Please extract text from a PDF first.")
+
 # Create the main window
 root = tk.Tk()
 root.title("PDF Text Extractor with NLP and OCR")
@@ -118,6 +136,14 @@ categorize_button.pack(pady=5)
 # OCR button
 ocr_button = tk.Button(root, text="Perform OCR", command=perform_ocr_extraction)
 ocr_button.pack(pady=10)
+
+# add button to display tokenized text
+tokenize_button = tk.Button(root, text="Tokenize Text", command=display_tokenized_text) 
+tokenize_button.pack(pady=5)
+
+# Add button to display extracted entities
+entities_button = tk.Button(root, text="Extract Entities", command=display_extracted_entities)
+entities_button.pack(pady=5)
 
 # Export buttons
 export_to_docx_button = tk.Button(root, text="Export to .docx", command=export_to_docx)
