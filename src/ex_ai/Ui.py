@@ -5,7 +5,7 @@ from text_analysis.txt_analysis import *
 import os
 from docx import Document
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
-import torch
+#import torch
 
 # Global variable to store extracted text and file path
 extracted_text = ""
@@ -34,7 +34,7 @@ def select_file_and_extract():
     else:
         messagebox.showwarning("No File Selected", "Please select a PDF file to extract.")
 
-# Function to export the extracted text to a .txt file
+# Function to send the extracted text to a .txt file
 def export_to_txt():
     global extracted_text, pdf_file_path
     if extracted_text and pdf_file_path:
@@ -49,7 +49,7 @@ def export_to_txt():
     else:
         messagebox.showwarning("No Text to Export", "Please extract text from a PDF first.")
 
-# Function to export the extracted text to a .docx file
+# Function to send the extracted text to a .docx file
 def export_to_docx():
     global extracted_text, pdf_file_path
     if extracted_text and pdf_file_path:
@@ -76,6 +76,7 @@ def summarize_extracted_text():
     else:
         messagebox.showwarning("No Text to Summarize", "Please extract text from a PDF first.")
 
+# function for keywords extraction
 def extract_keywords_from_text():
     global extracted_text
     if extracted_text:
@@ -84,6 +85,7 @@ def extract_keywords_from_text():
     else:
         messagebox.showwarning("No Text for Keywords", "Please extract text from a PDF first.")
 
+# function to categorize extracted text
 def categorize_extracted_text():
     global extracted_text
     if extracted_text:
@@ -149,7 +151,6 @@ def generate_paragraph(prompt, max_length=150):
     generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
     return generated_text
 
-
 # Function to generate a paragraph from extracted text
 def generate_paragraph_from_text():
     global extracted_text
@@ -165,44 +166,37 @@ root.title("PDF Text Extractor with NLP and OCR")
 
 # Create buttons for selecting PDF and exporting text
 select_file_button = tk.Button(root, text="Select PDF", command=select_file_and_extract)
-select_file_button.pack(pady=10)
-
-# NLP action buttons
 summarize_button = tk.Button(root, text="Summarize Text", command=summarize_extracted_text)
-summarize_button.pack(pady=5)
-
 keywords_button = tk.Button(root, text="Extract Keywords", command=extract_keywords_from_text)
-keywords_button.pack(pady=5)
-
 categorize_button = tk.Button(root, text="Categorize Text", command=categorize_extracted_text)
-categorize_button.pack(pady=5)
-
-# OCR button
 ocr_button = tk.Button(root, text="Perform OCR", command=perform_ocr_extraction)
-ocr_button.pack(pady=5)
-
-# add button to display tokenized text
-tokenize_button = tk.Button(root, text="Tokenize Text", command=display_tokenized_text) 
-tokenize_button.pack(pady=5)
-
-# Add button to display extracted entities
+tokenize_button = tk.Button(root, text="Tokenize Text", command=display_tokenized_text)
 entities_button = tk.Button(root, text="Extract Entities", command=display_extracted_entities)
-entities_button.pack(pady=5)
-
-# Export buttons
 export_to_docx_button = tk.Button(root, text="Export to .docx", command=export_to_docx)
-export_to_docx_button.pack(pady=5)
-
 export_to_txt_button = tk.Button(root, text="Export to .txt", command=export_to_txt)
-export_to_txt_button.pack(pady=5)
+generate_button = tk.Button(root, text="Generate Paragraph", command=generate_paragraph_from_text)
+
+# Place buttons in a grid
+buttons = [
+    select_file_button, summarize_button, keywords_button, categorize_button,
+    ocr_button, tokenize_button, entities_button, export_to_docx_button,
+    export_to_txt_button, generate_button
+]
+
+for i, button in enumerate(buttons):
+    button.grid(row=0, column=i, padx=5, pady=5, sticky="ew")
+
+# Configure the grid to allow wrapping
+for i in range(len(buttons)):
+    root.grid_columnconfigure(i, weight=1)
 
 # Text widget to display extracted text, separated by pages
 text_output = tk.Text(root, height=20, width=80)
-text_output.pack(pady=5)
+text_output.grid(row=1, column=0, columnspan=len(buttons), padx=5, pady=5, sticky="nsew")
 
-# Add button to generate paragraph
-generate_button = tk.Button(root, text="Generate Paragraph", command=generate_paragraph_from_text)
-generate_button.pack(pady=5)
+# Configure the grid to expand with the window
+root.grid_rowconfigure(1, weight=1)
+root.grid_columnconfigure(0, weight=1)
 
 # Run the Tkinter event loop
 root.mainloop()
