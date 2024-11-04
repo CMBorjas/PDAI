@@ -82,6 +82,7 @@ Each member will contribute to the testing and documentation for their assigned 
   - Create an environment for this application
   - Activate you environment
   - Change your directory to the appropriate folder
+  - Install the requirements.txt file in the project folder src
   - Enter the following command in your Anaconda environment 
     - \"python -m ex_ai.Ui"
   - Click on \"Select a Pdf file"
