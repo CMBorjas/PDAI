@@ -137,14 +137,23 @@ def generate_paragraph(prompt, max_length=150):
     # Encode the prompt
     input_ids = tokenizer.encode(prompt, return_tensors='pt')
 
-    # Generate text
+    """
+    This code uses the generate method of the GPT-2 model to generate text based on the provided input IDs. The parameters used in the generate method are:
+
+        input_ids: The encoded input prompt.
+        max_length: The maximum length of the generated text.
+        num_return_sequences: The number of sequences to generate.
+        no_repeat_ngram_size: Prevents repeating n-grams of the specified size.
+        top_p: Implements nucleus sampling, where only the most probable tokens with a cumulative probability above this threshold are considered.
+        temperature: Controls the randomness of predictions by scaling the logits before applying softmax.
+    """
     output = model.generate(
         input_ids, 
         max_length=max_length, 
         num_return_sequences=1,
-          no_repeat_ngram_size=2,
-          top_p=0.95,
-          temperature=0.7
+        no_repeat_ngram_size=2,
+        top_p=0.95,
+        temperature=0.7
     )
     
     # Decode the generated text
