@@ -1,13 +1,20 @@
+import os
+import sys
+# Add the src directory to Python's path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, simpledialog
 from pdf_extraction.extractor import extract_text_from_pdf
 from text_analysis.txt_analysis import summarize_text, extract_keywords, categorize_text, extract_text_with_ocr
-import os
 from docx import Document
+from text_analysis.query_and_train_model import query_and_train_model
+from word_generation.text_generation import train_model_on_corpus
 
 # Global variable to store extracted text and file path
 extracted_text = ""
 pdf_file_path = ""
+CORPUS_DIR = "PDAI/data/corpus"
 
 # Function to handle file selection and text extraction
 def select_file_and_extract():
@@ -99,7 +106,7 @@ def perform_ocr_extraction():
 
 # Create the main window
 root = tk.Tk()
-root.title("PDF Text Extractor with NLP and OCR")
+root.title("PDF Text Extractor with NLP, OCR Tools and corpus training")
 
 # Create buttons for selecting PDF and exporting text
 select_file_button = tk.Button(root, text="Select PDF", command=select_file_and_extract)
@@ -129,6 +136,9 @@ export_to_txt_button.pack(pady=10)
 # Text widget to display extracted text, separated by pages
 text_output = tk.Text(root, height=20, width=80)
 text_output.pack(pady=10)
+
+train_button = tk.Button(root, text="Train Model on Corpus", command=query_and_train_model)
+train_button.pack(pady=10)
 
 # Run the Tkinter event loop
 root.mainloop()
