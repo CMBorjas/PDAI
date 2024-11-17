@@ -60,3 +60,15 @@ def extract_text_with_ocr(pdf_path):
         text = pytesseract.image_to_string(page)
         ocr_text += f"--- Page {page_num + 1} OCR Text ---\n{text}\n\n"
     return ocr_text
+
+# function for tokenization
+def tokenize_text(text):
+    doc = nlp(text)
+    tokens = [token.text for token in doc]
+    return tokens
+
+# Function for entity extraction
+def extract_entities(text):
+    doc = nlp(text)
+    entities = {ent.text: ent.label_ for ent in doc.ents}
+    return entities

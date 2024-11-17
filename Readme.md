@@ -53,13 +53,15 @@ This folder holds unit tests for each module.
 Each person can take responsibility for one or more modules:
 
 - **Person 1**: PDF Text Extraction (pdf_extraction)
-  - Task: Extract text from PDFs, integrate OCR if needed for scanned PDFs.
+  - Complete: Extract text from PDFs, integrate OCR if needed for scanned PDFs.
 - **Person 2**: Text Analysis (text_analysis)
-  - Task: Use NLP techniques to process extracted text, implement tokenization, entity extraction, etc.
+  - Complete: Use NLP techniques to process extracted text, implement tokenization, entity extraction, etc.
 - **Person 3**: Word Document Generation (word_generation)
-  - Task: Create Word documents from processed text and support customization options.
+  - TODO: Create Word documents from processed text and support customization options.
 - **Person 4**: Explainability (explainable_ai)
-  - Task: Implement explainability techniques (SHAP, LIME) and visualize decision-making in text extraction and generation.
+  - TODO: Implement explainability techniques (SHAP, LIME) and visualize decision-making in text extraction and generation.
+
+- **Generated Paragraph**: Implement text generation for the data added by users. Model should be able to be added to the SHAP and LIME Pipepline.
 
 Each member will contribute to the testing and documentation for their assigned module.
 
@@ -80,6 +82,7 @@ Each member will contribute to the testing and documentation for their assigned 
   - Create an environment for this application
   - Activate you environment
   - Change your directory to the appropriate folder
+  - Install the requirements.txt file in the project folder src
   - Enter the following command in your Anaconda environment 
     - \"python -m ex_ai.Ui"
   - Click on \"Select a Pdf file"
