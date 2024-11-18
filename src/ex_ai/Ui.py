@@ -1,16 +1,26 @@
 import os
 import sys
-# Add the src directory to Python's path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
 from pdf_extraction.extractor import extract_text_from_pdf
 from text_analysis.txt_analysis import summarize_text, extract_keywords, categorize_text, extract_text_with_ocr
-import os
 from docx import Document
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
+import torch
+from shap_analysis.shap_utils import explain_model_with_shap
 
-# Global variable to store extracted text and file path
+# Add the src directory to Python's path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+# Load a smaller GPT-2 model and tokenizer to stay within memory limits
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")  # Ensure the correct model identifier
+model = GPT2LMHeadModel.from_pretrained(
+    "gpt2", 
+    torch_dtype=torch.float16,  # Use FP16 for reduced memory usage
+    low_cpu_mem_usage=True  # Reduce memory during model initialization
+)
+
+# Global variables to store extracted text and file path
 extracted_text = ""
 pdf_file_path = ""
 
@@ -30,6 +40,9 @@ def select_file_and_extract():
             for page_num, page_text in extracted_text_dict.items():
                 extracted_text += f"--- Page {page_num} ---\n{page_text}\n\n"
                 text_output.insert(tk.END, f"--- Page {page_num} ---\n{page_text}\n\n")
+            
+            # Clear intermediate memory
+            del extracted_text_dict
         else:
             messagebox.showerror("Extraction Failed", "Unable to extract text from the PDF.")
     else:
@@ -77,7 +90,6 @@ def summarize_extracted_text():
     else:
         messagebox.showwarning("No Text to Summarize", "Please extract text from a PDF first.")
 
-# function for keywords extraction
 def extract_keywords_from_text():
     global extracted_text
     if extracted_text:
@@ -86,7 +98,6 @@ def extract_keywords_from_text():
     else:
         messagebox.showwarning("No Text for Keywords", "Please extract text from a PDF first.")
 
-# function to categorize extracted text
 def categorize_extracted_text():
     global extracted_text
     if extracted_text:
@@ -104,51 +115,10 @@ def perform_ocr_extraction():
     else:
         messagebox.showwarning("No File Selected", "Please select a PDF file for OCR.")
 
-# function to display tokenized text
-def display_tokenized_text():
-    global extracted_text
-    if extracted_text:
-        tokens = tokenize_text(extracted_text)
-        text_output.insert(tk.END, f"\n--- Tokenized Text ---\n{', '.join(tokens)}\n")
-    else:
-        messagebox.showwarning("No Text to Tokenize", "Please extract text from a PDF first.")
-
-# function to display extracted entities
-def display_extracted_entities():
-    global extracted_text
-    if extracted_text:
-        entities = extract_entities(extracted_text)
-        text_output.insert(tk.END, f"\n--- Extracted Entities ---\n{', '.join(entities)}\n")
-    else:
-        messagebox.showwarning("No Text to Extract Entities", "Please extract text from a PDF first.")
-
 # Function to generate text using GPT-2 model
 def generate_paragraph(prompt, max_length=150):
-    """
-    Generate a paragraph based on the given prompt.
-
-    Parameters:
-    - prompt (str): The input text prompt for the model.
-    - max_length (int): The maximum length of the generated text.
-
-    Returns:
-    - str: Generated paragraph as a string.
-    """
-
-    # Encode the prompt
     input_ids = tokenizer.encode(prompt, return_tensors='pt')
-
-    """
-    This code uses the generate method of the GPT-2 model to generate text based on the provided input IDs. The parameters used in the generate method are:
-
-        input_ids: The encoded input prompt.
-        max_length: The maximum length of the generated text.
-        num_return_sequences: The number of sequences to generate.
-        no_repeat_ngram_size: Prevents repeating n-grams of the specified size.
-        top_p: Implements nucleus sampling, where only the most probable tokens with a cumulative probability above this threshold are considered.
-        temperature: Controls the randomness of predictions by scaling the logits before applying softmax.
-    """
-    output = model.generate(
+    outputs = model.generate(
         input_ids, 
         max_length=max_length, 
         num_return_sequences=1,
@@ -156,12 +126,9 @@ def generate_paragraph(prompt, max_length=150):
         top_p=0.95,
         temperature=0.7
     )
-    
-    # Decode the generated text
-    generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
+    generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
     return generated_text
 
-# Function to generate a paragraph from extracted text
 def generate_paragraph_from_text():
     global extracted_text
     if extracted_text:
@@ -170,39 +137,48 @@ def generate_paragraph_from_text():
     else:
         messagebox.showwarning("No Text to Generate", "Please extract text from a PDF first.")
 
+# SHAP Explanation Function
+def explain_with_shap():
+    global extracted_text
+    if extracted_text:
+        explain_model_with_shap(model, tokenizer, extracted_text)
+    else:
+        messagebox.showwarning("No Text for SHAP", "Please extract text from a PDF first.")
+
 # Create the main window
 root = tk.Tk()
-root.title("PDF Text Extractor with NLP, OCR Tools and corpus training")
+root.title("PDF Text Extractor with NLP, OCR Tools, and Corpus Training")
 
-# Create buttons for selecting PDF and exporting text
+# Create buttons for various functions
 select_file_button = tk.Button(root, text="Select PDF", command=select_file_and_extract)
 summarize_button = tk.Button(root, text="Summarize Text", command=summarize_extracted_text)
 keywords_button = tk.Button(root, text="Extract Keywords", command=extract_keywords_from_text)
 categorize_button = tk.Button(root, text="Categorize Text", command=categorize_extracted_text)
 ocr_button = tk.Button(root, text="Perform OCR", command=perform_ocr_extraction)
-tokenize_button = tk.Button(root, text="Tokenize Text", command=display_tokenized_text)
-entities_button = tk.Button(root, text="Extract Entities", command=display_extracted_entities)
 export_to_docx_button = tk.Button(root, text="Export to .docx", command=export_to_docx)
 export_to_txt_button = tk.Button(root, text="Export to .txt", command=export_to_txt)
 generate_button = tk.Button(root, text="Generate Paragraph", command=generate_paragraph_from_text)
+shap_button = tk.Button(root, text="Explain with SHAP", command=explain_with_shap)
+train_button = tk.Button(root, text="Train Model with Checkpointing", command=lambda: train_model_on_corpus(selected_file_paths))
+resume_button = tk.Button(root, text="Resume Training", command=lambda: load_checkpoint("checkpoints/latest_checkpoint.pth"))
 
-# Place buttons in a grid
+# Place buttons in a grid layout
 buttons = [
     select_file_button, summarize_button, keywords_button, categorize_button,
-    ocr_button, tokenize_button, entities_button, export_to_docx_button,
-    export_to_txt_button, generate_button
+    ocr_button, export_to_docx_button, export_to_txt_button, generate_button,
+    shap_button, train_button, resume_button
 ]
 
 for i, button in enumerate(buttons):
     button.grid(row=0, column=i, padx=5, pady=5, sticky="ew")
 
-# Configure the grid to allow wrapping
+# Configure the grid to allow resizing
 for i in range(len(buttons)):
     root.grid_columnconfigure(i, weight=1)
 
-# Text widget to display extracted text, separated by pages
+# Text widget to display extracted text
 text_output = tk.Text(root, height=20, width=80)
-text_output.pack(pady=10)
+text_output.grid(row=1, column=0, columnspan=len(buttons), padx=5, pady=5, sticky="nsew")
 
 # Run the Tkinter event loop
 root.mainloop()
