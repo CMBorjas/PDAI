@@ -1,17 +1,26 @@
 import os
 import sys
-# Add the src directory to Python's path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
 from pdf_extraction.extractor import extract_text_from_pdf
 from text_analysis.txt_analysis import summarize_text, extract_keywords, categorize_text, extract_text_with_ocr
 from docx import Document
-from text_analysis.query_and_train_model import query_and_train_model
-from word_generation.text_generation import train_model_on_corpus
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
+import torch
+from shap_analysis.shap_utils import explain_model_with_shap
 
-# Global variable to store extracted text and file path
+# Add the src directory to Python's path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+# Load a smaller GPT-2 model and tokenizer to stay within memory limits
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")  # Ensure the correct model identifier
+model = GPT2LMHeadModel.from_pretrained(
+    "gpt2", 
+    torch_dtype=torch.float16,  # Use FP16 for reduced memory usage
+    low_cpu_mem_usage=True  # Reduce memory during model initialization
+)
+
+# Global variables to store extracted text and file path
 extracted_text = ""
 pdf_file_path = ""
 CORPUS_DIR = "PDAI/data/corpus"
@@ -32,6 +41,9 @@ def select_file_and_extract():
             for page_num, page_text in extracted_text_dict.items():
                 extracted_text += f"--- Page {page_num} ---\n{page_text}\n\n"
                 text_output.insert(tk.END, f"--- Page {page_num} ---\n{page_text}\n\n")
+            
+            # Clear intermediate memory
+            del extracted_text_dict
         else:
             messagebox.showerror("Extraction Failed", "Unable to extract text from the PDF.")
     else:
@@ -104,11 +116,41 @@ def perform_ocr_extraction():
     else:
         messagebox.showwarning("No File Selected", "Please select a PDF file for OCR.")
 
+# Function to generate text using GPT-2 model
+def generate_paragraph(prompt, max_length=150):
+    input_ids = tokenizer.encode(prompt, return_tensors='pt')
+    outputs = model.generate(
+        input_ids, 
+        max_length=max_length, 
+        num_return_sequences=1,
+        no_repeat_ngram_size=2,
+        top_p=0.95,
+        temperature=0.7
+    )
+    generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return generated_text
+
+def generate_paragraph_from_text():
+    global extracted_text
+    if extracted_text:
+        paragraph = generate_paragraph(extracted_text)
+        text_output.insert(tk.END, f"\n--- Generated Paragraph ---\n{paragraph}\n")
+    else:
+        messagebox.showwarning("No Text to Generate", "Please extract text from a PDF first.")
+
+# SHAP Explanation Function
+def explain_with_shap():
+    global extracted_text
+    if extracted_text:
+        explain_model_with_shap(model, tokenizer, extracted_text)
+    else:
+        messagebox.showwarning("No Text for SHAP", "Please extract text from a PDF first.")
+
 # Create the main window
 root = tk.Tk()
-root.title("PDF Text Extractor with NLP, OCR Tools and corpus training")
+root.title("PDF Text Extractor with NLP, OCR Tools, and Corpus Training")
 
-# Create buttons for selecting PDF and exporting text
+# Create buttons for various functions
 select_file_button = tk.Button(root, text="Select PDF", command=select_file_and_extract)
 select_file_button.pack(pady=10)
 
@@ -126,24 +168,33 @@ categorize_button.pack(pady=5)
 
 # OCR button
 ocr_button = tk.Button(root, text="Perform OCR", command=perform_ocr_extraction)
-ocr_button.pack(pady=10)
-
-# Export buttons
 export_to_docx_button = tk.Button(root, text="Export to .docx", command=export_to_docx)
 export_to_docx_button.pack(pady=10)
 
 # Export to txt button
 export_to_txt_button = tk.Button(root, text="Export to .txt", command=export_to_txt)
-export_to_txt_button.pack(pady=10)
-
-# Text widget to display extracted text, separated by pages
-text_output = tk.Text(root, height=20, width=80)
-text_output.pack(pady=10)
-
-# Button to train the model on the corpus
+generate_button = tk.Button(root, text="Generate Paragraph", command=generate_paragraph_from_text)
+shap_button = tk.Button(root, text="Explain with SHAP", command=explain_with_shap)
 train_button = tk.Button(root, text="Train Model with Checkpointing", command=lambda: train_model_on_corpus(selected_file_paths))
 resume_button = tk.Button(root, text="Resume Training", command=lambda: load_checkpoint("checkpoints/latest_checkpoint.pth"))
-train_button.pack(pady=10)
+
+# Place buttons in a grid layout
+buttons = [
+    select_file_button, summarize_button, keywords_button, categorize_button,
+    ocr_button, export_to_docx_button, export_to_txt_button, generate_button,
+    shap_button, train_button, resume_button
+]
+
+for i, button in enumerate(buttons):
+    button.grid(row=0, column=i, padx=5, pady=5, sticky="ew")
+
+# Configure the grid to allow resizing
+for i in range(len(buttons)):
+    root.grid_columnconfigure(i, weight=1)
+
+# Text widget to display extracted text
+text_output = tk.Text(root, height=20, width=80)
+text_output.grid(row=1, column=0, columnspan=len(buttons), padx=5, pady=5, sticky="nsew")
 
 # Run the Tkinter event loop
 root.mainloop()
