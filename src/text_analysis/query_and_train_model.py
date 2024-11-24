@@ -3,9 +3,14 @@ from tkinter import simpledialog, messagebox
 from word_generation.text_generation import train_model_on_corpus
 
 # Path to the corpus directory
-CORPUS_DIR = "PDAI/data/corpus"
 
 def query_and_train_model():
+    # Ensure the corpus directory exists
+    global CORPUS_DIR
+    # Dynamically resolve the CORPUS_DIR from the project root
+    CORPUS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "corpus"))    
+    print(f"Resolved CORPUS_DIR path: {CORPUS_DIR}")
+    
     # Check if the corpus directory exists
     if not os.path.exists(CORPUS_DIR):
         messagebox.showerror("Error", f"The directory '{CORPUS_DIR}' does not exist.")
