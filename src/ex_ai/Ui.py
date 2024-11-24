@@ -116,30 +116,15 @@ root.title("PDF Text Extractor with NLP, OCR Tools and Corpus Training")
 
 # Create buttons for actions
 select_file_button = tk.Button(root, text="Select PDF", command=select_file_and_extract)
-select_file_button.pack(pady=10)
-
-# NLP action buttons
 summarize_button = tk.Button(root, text="Summarize Text", command=summarize_extracted_text)
-summarize_button.pack(pady=5)
-
-# Keywords and categorization buttons
 keywords_button = tk.Button(root, text="Extract Keywords", command=extract_keywords_from_text)
-keywords_button.pack(pady=5)
-
-# Categorization button
 categorize_button = tk.Button(root, text="Categorize Text", command=categorize_extracted_text)
-categorize_button.pack(pady=5)
-
-# OCR button
 ocr_button = tk.Button(root, text="Perform OCR", command=perform_ocr_extraction)
 export_to_docx_button = tk.Button(root, text="Export to .docx", command=export_to_docx)
-export_to_docx_button.pack(pady=10)
-
-# Export to txt button
 export_to_txt_button = tk.Button(root, text="Export to .txt", command=export_to_txt)
 train_button = tk.Button(root, text="Train Model on Corpus", command=query_and_train_model)
 
-# Place buttons in a single row (horizontal alignment) at the top
+# Place buttons in a single row (horizontal alignment) at the top using grid
 buttons = [
     select_file_button, summarize_button, keywords_button, categorize_button,
     ocr_button, export_to_docx_button, export_to_txt_button, train_button
@@ -152,10 +137,9 @@ for col_index, button in enumerate(buttons):
 for col_index in range(len(buttons)):
     root.grid_columnconfigure(col_index, weight=1)
 
-# Text widget to display extracted text
-# Text widget to display extracted text
+# Text widget to display extracted text, separated by pages
 text_output = tk.Text(root, height=20, width=80)
-text_output.grid(row=1, column=0, columnspan=len(buttons), padx=5, pady=5, sticky="nsew")
+text_output.grid(row=1, column=0, columnspan=8, padx=5, pady=5, sticky="nsew")
 
 # Configure the row for resizing
 root.grid_rowconfigure(1, weight=1)
